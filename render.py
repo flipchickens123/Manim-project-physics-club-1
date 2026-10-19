@@ -4,7 +4,8 @@
     python render.py --preview       # all scenes, quick 540x960 @ 15 fps
     python render.py pendulum waves  # only some scenes
 
-Finished videos are copied to exports/ (finals) or exports/preview/.
+Finished videos (plus .srt subtitles for narrated reels) are copied to
+exports/ (finals) or exports/preview/.
 """
 
 import argparse
@@ -18,7 +19,7 @@ ROOT = Path(__file__).resolve().parent
 
 # name: (file, scene class, timestamp in seconds of a good cover frame)
 SCENES = {
-    "projectile": ("projectile.py", "ProjectileMotion", 25),
+    "projectile": ("projectile.py", "ProjectileMotion", 64),
     "pendulum": ("pendulum.py", "Pendulum", 17),
     "waves": ("waves.py", "WaveInterference", 12),
     "kepler": ("kepler.py", "KeplerSecondLaw", 27),
@@ -51,6 +52,8 @@ def main():
         height = res.split(",")[1]
         video = ROOT / "media" / "videos" / Path(file).stem / f"{height}p{fps}" / f"{name}.mp4"
         shutil.copy(video, out_dir / f"{name}.mp4")
+        if video.with_suffix(".srt").exists():  # subtitles, written for narrated reels
+            shutil.copy(video.with_suffix(".srt"), out_dir / f"{name}.srt")
         if args.cover:
             subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(cover_at), "-i", str(video),
                             "-frames:v", "1", str(out_dir / f"{name}_cover.png")], check=True)

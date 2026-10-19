@@ -19,9 +19,9 @@ def flight_time(angle_deg):
 
 
 class ProjectileMotion(ReelScene):
-    def construct(self):
-        self.intro("Projectile Motion", "Why does 45° go the farthest?")
+    narration_script = "projectile"  # spoken lines live in scripts/projectile.md
 
+    def construct(self):
         # Equal x/y scale (0.17 units per metre) so launch angles look right.
         axes = Axes(
             x_range=[0, 45, 10], y_range=[0, 20, 5], x_length=7.65, y_length=3.4,
@@ -30,7 +30,10 @@ class ProjectileMotion(ReelScene):
         ticks = axis_labels(axes, xs=(10, 20, 30, 40), ys=(5, 10, 15, 20))
         xl = txt("distance (m)", 22, MUTED).next_to(axes.x_axis, DOWN, 0.55)
         yl = txt("height (m)", 22, MUTED).next_to(axes.y_axis, UP, 0.15).align_to(axes, LEFT)
-        self.play(Create(axes), FadeIn(ticks), FadeIn(xl), FadeIn(yl))
+
+        with self.voiceover("intro"):
+            self.intro("Projectile Motion", "Why does 45° go the farthest?", hold=0.6)
+            self.play(Create(axes), FadeIn(ticks), FadeIn(xl), FadeIn(yl))
 
         # ---- Part 1: one launch, velocity split into components ----------
         angle = 50
@@ -64,12 +67,17 @@ class ProjectileMotion(ReelScene):
             live_text(lambda: f"vertical speed = {V0 * np.sin(a) - G * t.get_value():+.1f} m/s",
                       place_row(2), color=PINK),
         )
-
         launch = self.caption(f"Launch: {V0:.0f} m/s at {angle}°", y=-2.9, color=ACCENT)
-        self.add(trail)
-        self.play(FadeIn(ball), FadeIn(arrows), FadeIn(readouts), FadeIn(launch))
-        self.play(t.animate.set_value(T), run_time=4.5, rate_func=linear)
-        self.wait(0.5)
+
+        with self.voiceover("launch"):
+            self.add(trail)
+            self.play(FadeIn(ball), FadeIn(arrows), FadeIn(readouts), FadeIn(launch))
+
+        # The ball reaches the top as the narrator says "zero at the very top".
+        with self.voiceover("rise") as d:
+            self.play(t.animate.set_value(T / 2), run_time=d * 0.9, rate_func=linear)
+        with self.voiceover("fall") as d:
+            self.play(t.animate.set_value(T), run_time=d * 0.8, rate_func=linear)
 
         note = VGroup(
             txt("Horizontal: constant speed", 32, CYAN),
@@ -77,14 +85,14 @@ class ProjectileMotion(ReelScene):
         ).arrange(DOWN, buff=0.25).move_to(DOWN * 4.2)
         if note.width > 8.2:
             note.scale_to_fit_width(8.2)
-        self.play(FadeIn(note[0], shift=UP * 0.2))
-        self.play(FadeIn(note[1], shift=UP * 0.2))
-        self.wait(2)
+        with self.voiceover("idea"):
+            self.play(FadeIn(note[0], shift=UP * 0.2))
+            self.play(FadeIn(note[1], shift=UP * 0.2))
 
         arrows.clear_updaters()
         readouts.clear_updaters()
         trail.clear_updaters()
-        self.play(*[FadeOut(m) for m in (ball, arrows, readouts, launch, note, trail)])
+        self.play(*[FadeOut(m) for m in (ball, arrows, readouts, launch, note, trail)], run_time=0.6)
 
         # ---- Part 2: same speed, five angles --------------------------------
         angles = [15, 30, 45, 60, 75]
@@ -103,11 +111,14 @@ class ProjectileMotion(ReelScene):
             VGroup(Dot(color=c, radius=0.09), txt(f"{ang}°", 28, c)).arrange(RIGHT, buff=0.15)
             for ang, c in zip(angles, colors)
         ]).arrange(RIGHT, buff=0.45).move_to(DOWN * 0.7)
-
         q = self.caption("Same speed. Which angle lands farthest?", y=-1.9, size=32)
-        self.add(*trails)
-        self.play(FadeIn(legend), FadeIn(q), *[FadeIn(b) for b in balls])
-        self.play(t2.animate.set_value(flight_time(75)), run_time=5, rate_func=linear)
+
+        with self.voiceover("angles") as d:
+            self.add(*trails)
+            self.play(LaggedStart(*[FadeIn(m) for m in legend], lag_ratio=0.5),
+                      *[FadeIn(b) for b in balls], run_time=d * 0.55)
+            self.play(FadeIn(q), run_time=0.5)
+            self.play(t2.animate.set_value(flight_time(75)), run_time=max(4.0, d * 0.45), rate_func=linear)
         for b in balls + trails:
             b.clear_updaters()
 
@@ -118,18 +129,25 @@ class ProjectileMotion(ReelScene):
         same = position(flight_time(30), 30)[0]
         pair = DashedLine(axes.c2p(same, 0) + UP * 0.05, axes.c2p(same, 9.5), color=MUTED)
         pair_text = txt("30° and 60° tie!", 26, TEXT).next_to(pair, UP, 0.1)
-        self.play(FadeOut(q), Create(ring), trails[2].animate.set_stroke(width=7), FadeIn(win))
-        self.play(Create(pair), FadeIn(pair_text))
+        with self.voiceover("winner") as d:
+            self.play(FadeOut(q), Create(ring), trails[2].animate.set_stroke(width=7), FadeIn(win))
+            self.wait(d * 0.4)
+            self.play(Create(pair), FadeIn(pair_text))
 
-        formula = panel(VGroup(
+        formula = VGroup(
             txt("range = v² · sin(2θ) / g", 38, TEXT),
             txt("sin(2θ) is largest when 2θ = 90°", 28, MUTED),
-        ).arrange(DOWN, buff=0.25)).move_to(DOWN * 3.8)
-        self.play(FadeIn(formula, shift=UP * 0.3))
-        self.wait(3)
+        ).arrange(DOWN, buff=0.25)
+        box = panel(formula).move_to(DOWN * 3.8)
+        with self.voiceover("formula") as d:
+            self.play(FadeIn(box[0]), FadeIn(formula[0], shift=UP * 0.2))
+            self.wait(d * 0.45)
+            self.play(FadeIn(formula[1], shift=UP * 0.2))
 
-        self.outro([
-            "x and y motion are independent.",
-            "With no air resistance,",
-            "45° gives the longest range.",
-        ])
+        with self.voiceover("outro"):
+            self.outro([
+                "x and y motion are independent.",
+                "With no air resistance,",
+                "45° gives the longest range.",
+            ], hold=0)
+        self.wait(1.5)

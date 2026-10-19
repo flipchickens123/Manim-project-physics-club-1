@@ -4,6 +4,8 @@ Everything is drawn with ``Text`` (Pango), so no LaTeX install is needed.
 Change CLUB_NAME / HANDLE below to rebrand every video at once.
 """
 
+from contextlib import contextmanager
+
 from manim import (
     DOWN,
     LEFT,
@@ -25,7 +27,7 @@ from manim import (
 )
 
 CLUB_NAME = "PHYSICS CLUB"
-HANDLE = "@physicsclub"  # <- put the club's Instagram handle here
+HANDLE = "@hse.physics"
 FONT = "Inter"  # falls back to the system sans-serif font if not installed
 
 BG = "#0B1021"
@@ -84,14 +86,40 @@ def axis_labels(axes, xs=(), ys=(), size=22, fmt="{:g}"):
 
 
 class ReelScene(Scene):
-    """Base scene: branding bar, title card, and closing card."""
+    """Base scene: branding bar, title card, closing card, optional narration."""
+
+    # Set to a script name (scripts/<name>.md) to enable self.voiceover().
+    narration_script = None
+    narration_gap = 0.35  # seconds of quiet after each spoken section
 
     def setup(self):
         self.camera.background_color = BG
+        if self.narration_script:
+            import narration
+
+            self._speak = narration.speak
+            self.script = narration.load_script(self.narration_script)
         dot = Dot(radius=0.07, color=ACCENT)
         name = txt(CLUB_NAME, 26, ACCENT, weight="BOLD")
         self.brand = VGroup(dot, name).arrange(RIGHT, buff=0.15).move_to(UP * 6.9)
         self.handle = txt(HANDLE, 24, MUTED).move_to(DOWN * 6.9)
+
+    @contextmanager
+    def voiceover(self, section):
+        """Speak one script section while the animations inside the block play.
+
+        Yields the clip length (seconds) so animations can be timed to it. If the
+        animations finish early, the scene waits for the voice to finish.
+        """
+        text = self.script[section]
+        path, duration = self._speak(text)
+        start = self.time
+        self.add_sound(str(path))
+        self.add_subcaption(text, duration=duration)
+        yield duration
+        left = start + duration + self.narration_gap - self.time
+        if left > 0.05:
+            self.wait(left)
 
     def intro(self, title, subtitle, hold=1.2):
         """Big title card, then shrinks the title into a header. Returns the header."""
@@ -142,7 +170,8 @@ class ReelScene(Scene):
         self.play(FadeIn(card[0], scale=0.9), FadeIn(head))
         self.play(LaggedStart(*[FadeIn(l, shift=UP * 0.2) for l in body], lag_ratio=0.35))
         self.play(FadeIn(cta, shift=UP * 0.3))
-        self.wait(hold)
+        if hold > 0:
+            self.wait(hold)
 
     @staticmethod
     def _atom():

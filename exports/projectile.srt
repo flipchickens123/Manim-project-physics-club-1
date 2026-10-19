@@ -1,0 +1,36 @@
+1
+00:00:00,000 --> 00:00:08,241
+Throw a ball, kick a football, or launch a water rocket, and it flies along the same kind of curve. So which launch angle sends it the farthest?
+
+2
+00:00:08,566 --> 00:00:12,479
+Let's launch a ball at twenty metres per second, at fifty degrees.
+
+3
+00:00:12,833 --> 00:00:21,780
+The blue arrow is its horizontal speed. The pink arrow is its vertical speed. Gravity shrinks the pink arrow, until it hits zero at the very top.
+
+4
+00:00:22,133 --> 00:00:27,297
+Then gravity speeds it up again on the way down. But the blue arrow never changes at all.
+
+5
+00:00:27,666 --> 00:00:34,849
+That's the big idea. Sideways motion and up-and-down motion are completely independent. Gravity only pulls down.
+
+6
+00:00:35,800 --> 00:00:45,109
+Now let's launch five balls at the same speed: at fifteen, thirty, forty-five, sixty, and seventy-five degrees. Which one lands the farthest?
+
+7
+00:00:45,633 --> 00:00:53,886
+Forty-five degrees wins, landing about forty-one metres away. And look: thirty and sixty degrees land in exactly the same spot!
+
+8
+00:00:54,233 --> 00:01:05,547
+Here's why. The range equals v squared, times sine of two theta, divided by g. Sine is biggest at ninety degrees. So two theta is ninety, and theta is forty-five.
+
+9
+00:01:05,866 --> 00:01:14,154
+So on flat ground, with no air resistance, forty-five degrees always goes the farthest. Follow H S E dot physics for more!
+

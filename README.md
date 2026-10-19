@@ -7,7 +7,7 @@ animation, and a closing "key idea" card.
 
 | Reel | Scene | What it shows |
 | --- | --- | --- |
-| `projectile` | `ProjectileMotion` | Velocity split into x/y parts, then 5 launch angles: why 45° goes farthest and 30°/60° tie |
+| `projectile` | `ProjectileMotion` | **Narrated.** Velocity split into x/y parts, then 5 launch angles: why 45° goes farthest and 30°/60° tie |
 | `pendulum` | `Pendulum` | Swinging pendulum (numerically integrated) with live KE / PE / total energy bars and an angle–time graph |
 | `waves` | `WaveInterference` | Constructive and destructive interference, then a standing wave with its nodes |
 | `kepler` | `KeplerSecondLaw` | Elliptical orbit with real Kepler-equation timing; equal areas swept in equal times |
@@ -15,10 +15,28 @@ animation, and a closing "key idea" card.
 
 Finished videos and cover images are in [`exports/`](exports/), ready to upload.
 
+## Narration
+
+`projectile` has a spoken voice-over. The words are in
+[`scripts/projectile.md`](scripts/projectile.md), one `## section` per part of
+the animation. Edit the text and re-render; the animation stretches to fit the
+new lines. Write things the way they should be said ("forty-five degrees",
+"H S E dot physics").
+
+The voice is generated offline by [Piper](https://github.com/OHF-Voice/piper1-gpl)
+using the `en_US-joe-medium` voice (trained on a CC0 public-domain dataset, so
+it's fine to post). The voice model (~60 MB) downloads into `voices/` on the
+first render. Voice, speed and pause length are set at the top of `narration.py`.
+A matching `exports/projectile.srt` subtitle file is written too.
+
+To narrate another reel: set `narration_script = "<name>"` on the scene class,
+write `scripts/<name>.md`, and wrap each part of `construct()` in
+`with self.voiceover("<section>") as duration:`.
+
 ## Setup
 
-Only Python and Manim are needed. The scenes use `Text`, not LaTeX, so you
-don't have to install a TeX distribution.
+Only Python, Manim and Piper (for the voice) are needed. The scenes use `Text`,
+not LaTeX, so you don't have to install a TeX distribution.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
